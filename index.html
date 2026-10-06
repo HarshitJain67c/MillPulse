@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MillPulse is a textile production intelligence dashboard for monitoring output, quality, downtime, and order risk.">
+  <meta name="theme-color" content="#10150f">
+  <title>MillPulse · Production Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2310150f'/%3E%3Cpath d='M10 35h10l4-14 8 28 6-20 4 6h12' fill='none' stroke='%23b6f36b' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#dashboard">Skip to dashboard</a>
+
+  <aside class="sidebar" aria-label="Application navigation">
+    <a class="logo" href="#dashboard" aria-label="MillPulse dashboard">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 36 36"><path d="M3 20h7l3-10 5 19 4-14 3 5h8"/></svg>
+      </span>
+      <span>Mill<span>Pulse</span></span>
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      <a class="active" href="#dashboard" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">▦</span><span>Overview</span>
+      </a>
+      <a href="#production">
+        <span class="nav-icon" aria-hidden="true">⌁</span><span>Production</span>
+      </a>
+      <a href="#quality">
+        <span class="nav-icon" aria-hidden="true">◇</span><span>Quality</span>
+      </a>
+      <a href="#orders">
+        <span class="nav-icon" aria-hidden="true">▤</span><span>Orders</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="system-state"><span></span><div><strong>Systems normal</strong><small>Updated just now</small></div></div>
+      <a class="profile" href="https://github.com/HarshitJain67c" target="_blank" rel="noreferrer">
+        <span class="avatar">HJ</span><span><strong>Harshit Jain</strong><small>Administrator</small></span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="app-shell" id="dashboard">
+    <header class="topbar">
+      <button class="mobile-menu" type="button" aria-expanded="false" aria-label="Open navigation">☰</button>
+      <div>
+        <p class="breadcrumb">Operations / <span>Overview</span></p>
+        <h1>Production command center</h1>
+      </div>
+      <div class="topbar-actions">
+        <label class="plant-select">
+          <span class="sr-only">Select plant</span>
+          <select id="plant-filter">
+            <option value="all">All facilities</option>
+            <option value="North Mill">North Mill</option>
+            <option value="South Mill">South Mill</option>
+          </select>
+        </label>
+        <button class="icon-button" id="export-button" type="button" title="Export production data as CSV" aria-label="Export production data as CSV">⇩</button>
+        <button class="primary-button" id="record-button" type="button"><span>＋</span> Record production</button>
+      </div>
+    </header>
+
+    <section class="workspace" aria-label="Production overview">
+      <div class="status-row">
+        <div>
+          <p class="date-label" id="today-label">Today</p>
+          <p class="shift-label"><span></span> Live operations · Morning shift</p>
+        </div>
+        <button class="text-button" id="reset-button" type="button">Reset demo data</button>
+      </div>
+
+      <section class="kpi-grid" aria-label="Key production indicators">
+        <article class="kpi-card accent-card">
+          <div class="kpi-head"><span>Output today</span><span class="trend positive">↗ 8.4%</span></div>
+          <strong id="output-value">0</strong>
+          <p><span id="target-value">0</span> unit target</p>
+          <div class="progress"><span id="output-progress"></span></div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-head"><span>Active lines</span><span class="card-icon blue">⌁</span></div>
+          <strong id="active-value">0</strong>
+          <p><span id="total-lines">0</span> monitored lines</p>
+          <div class="mini-status" id="line-status-summary"></div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-head"><span>Quality pass rate</span><span class="card-icon violet">◇</span></div>
+          <strong id="quality-value">0%</strong>
+          <p><span id="defect-value">0</span> defects recorded</p>
+          <span class="benchmark">Target ≥ 98.0%</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-head"><span>Orders at risk</span><span class="card-icon amber">!</span></div>
+          <strong id="risk-value">0</strong>
+          <p>Require attention today</p>
+          <button class="inline-action" type="button" data-scroll-to="orders">Review orders</button>
+        </article>
+      </section>
+
+      <div class="insight-grid">
+        <section class="panel throughput-panel" aria-labelledby="throughput-title">
+          <div class="panel-head">
+            <div><p class="overline">Throughput</p><h2 id="throughput-title">Seven-shift output</h2></div>
+            <span class="panel-total"><strong id="weekly-total">0</strong> total units</span>
+          </div>
+          <div class="chart-wrap" aria-label="Bar chart of units completed across seven shifts">
+            <div class="chart-scale"><span>2k</span><span>1.5k</span><span>1k</span><span>500</span><span>0</span></div>
+            <div class="bar-chart" id="bar-chart"></div>
+          </div>
+          <div class="chart-legend"><span><i class="legend-current"></i>Completed</span><span><i class="legend-target"></i>Target</span></div>
+        </section>
+
+        <section class="panel alert-panel" id="quality" aria-labelledby="alerts-title">
+          <div class="panel-head">
+            <div><p class="overline">Attention queue</p><h2 id="alerts-title">Live alerts</h2></div>
+            <span class="alert-count" id="alert-count">0</span>
+          </div>
+          <div class="alert-list" id="alert-list" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <section class="panel line-panel" id="production" aria-labelledby="line-title">
+        <div class="panel-head table-heading">
+          <div><p class="overline">Floor status</p><h2 id="line-title">Production lines</h2></div>
+          <div class="table-tools">
+            <label>
+              <span class="sr-only">Filter production lines</span>
+              <input id="line-search" type="search" placeholder="Search line or fabric">
+            </label>
+            <label>
+              <span class="sr-only">Filter by status</span>
+              <select id="status-filter">
+                <option value="all">All statuses</option>
+                <option value="running">Running</option>
+                <option value="attention">Attention</option>
+                <option value="idle">Idle</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Line</th><th>Facility</th><th>Fabric</th><th>Status</th><th>Progress</th><th>Quality</th><th>Updated</th></tr></thead>
+            <tbody id="line-table"></tbody>
+          </table>
+        </div>
+        <p class="empty-state" id="empty-state" hidden>No production lines match these filters.</p>
+      </section>
+
+      <section class="panel order-panel" id="orders" aria-labelledby="orders-title">
+        <div class="panel-head">
+          <div><p class="overline">Delivery watch</p><h2 id="orders-title">Orders at risk</h2></div>
+          <span class="demo-note">Portfolio prototype · Demo data</span>
+        </div>
+        <div class="order-grid" id="order-grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog class="record-dialog" id="record-dialog" aria-labelledby="dialog-title">
+    <form method="dialog" class="dialog-shell" id="production-form">
+      <div class="dialog-head">
+        <div><p class="overline">New floor update</p><h2 id="dialog-title">Record production</h2></div>
+        <button class="close-button" type="button" id="close-dialog" aria-label="Close dialog">×</button>
+      </div>
+      <p class="dialog-copy">Add a production line update. Draft data is stored only in this browser.</p>
+
+      <div class="form-grid">
+        <label><span>Line name</span><input name="line" required maxlength="24" placeholder="Line 07"></label>
+        <label><span>Facility</span><select name="facility" required><option>North Mill</option><option>South Mill</option></select></label>
+        <label class="wide"><span>Fabric</span><input name="fabric" required maxlength="36" placeholder="Cotton Twill"></label>
+        <label><span>Planned units</span><input name="planned" required type="number" min="1" max="100000" value="1600"></label>
+        <label><span>Completed units</span><input name="completed" required type="number" min="0" max="100000" value="0"></label>
+        <label><span>Defects</span><input name="defects" required type="number" min="0" max="10000" value="0"></label>
+        <label><span>Status</span><select name="status" required><option value="running">Running</option><option value="attention">Attention</option><option value="idle">Idle</option></select></label>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="secondary-button" type="button" id="cancel-dialog">Cancel</button>
+        <button class="primary-button" type="submit">Save update</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
